@@ -1,0 +1,392 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  CheckCircle, 
+  XCircle, 
+  FileText, 
+  ArrowRight, 
+  Activity,
+  Check,
+  RefreshCcw,
+  AlertCircle
+} from 'lucide-react';
+
+// Informes basados en los documentos proporcionados, con formato Cloze {respuesta_correcta}
+const initialReports = [
+  { 
+    id: 1, 
+    title: "Informe Médico 01 - Honduras",
+    text: `🏥 SISTEMA DE SALUD PÚBLICA - REPÚBLICA DE HONDURAS
+EXPEDIENTE CLÍNICO DIGITAL | Nº Registro: HN-2024-089-CLIM
+CENTRO EMISOR: Hospital de El Negrito, Departamento de Yoro.
+
+📄 DATOS DEL PACIENTE
+EDAD: 23 años.
+SEXO: Varón.
+PROCEDENCIA: Zona rural de El Negrito (Cerca de cuenca hidrográfica).
+FECHA DE INGRESO: 14 de mayo de 2024.
+
+🔍 EVALUACIÓN CLÍNICA
+El paciente acude a urgencias por un cuadro agudo de malestar general. Tras la exploración física y entrevista clínica, se registran los siguientes hallazgos:
+
+SINTOMATOLOGÍA: Presenta un cuadro de {fiebre alta} persistente, acompañado de escalofríos intensos, cefalea (dolor de cabeza) punzante y debilidad muscular severa. El paciente describe los síntomas como "similares a una gripe muy fuerte", pero con picos térmicos intermitentes.
+
+DIAGNÓSTICO PRESUNTIVO: Debido a la zona de residencia y la sintomatología, se sospecha de un caso de malaria (paludismo) por Plasmodium falciparum.
+
+💊 PLAN DE TRATAMIENTO
+Se prescribe el protocolo estándar para casos de malaria no complicada en zonas de resistencia:
+FÁRMACOS: Combinación de Artemeter y {Lumefantrina}.
+PAUTA: Administración durante 3 días consecutivos.
+DOSIS: Un total de 6 dosis repartidas (mañana y noche).
+FORMATO: Comprimidos (pastillas).
+
+⚠️ ANÁLISIS DE CONTEXTO
+Este caso no es aislado. El Hospital ha reportado un aumento del 40% en enfermedades transmitidas por mosquitos tras las inundaciones inusuales.`
+  },
+  { 
+    id: 2, 
+    title: "Informe Médico 02 - Nigeria",
+    text: `🏥 SERVICIO DE SALUD DEL ESTADO DE BORNO - NIGERIA
+EXPEDIENTE DE VIGILANCIA EPIDEMIOLÓGICA | REF: NG-BORN-2024-55
+UNIDAD EMISORA: Centro de Salud de Maiduguri.
+
+📄 DATOS DE LA PACIENTE
+EDAD: 56 años.
+SEXO: Mujer.
+LOCALIDAD: Asentamiento perimetral de Maiduguri.
+FECHA DE ADMISIÓN: 22 de junio de 2024.
+
+🔍 CUADRO CLÍNICO
+La paciente ingresa en la unidad de cuidados básicos presentando una evolución acelerada de síntomas gastrointestinales graves:
+
+SINTOMATOLOGÍA: Episodios de descomposición acuosa súbita y profusa (característica de "agua de arroz"), acompañados de vómitos recurrentes y náuseas. Se registran calambres dolorosos en las extremidades inferiores y signos de {deshidratación} rápida (ojos hundidos y pérdida de turgencia en la piel).
+
+DIAGNÓSTICO DIFERENCIAL: Aunque los síntomas iniciales podrían confundirse con una gastroenteritis común, la velocidad de la deshidratación sugiere una patología mucho más agresiva.
+
+💊 INTERVENCIÓN MÉDICA
+Se establece un protocolo de emergencia para estabilizar a la paciente y evitar el contagio comunitario:
+
+REHIDRATACIÓN: Suministro inmediato de {sales minerales} para compensar la pérdida crítica de líquidos y electrolitos.
+PROTOCOLO DE PREVENCIÓN: Dada la intensidad de la sintomatología y el riesgo epidémico en la zona, se inicia un tratamiento preventivo contra el {cólera} mediante la administración de cápsulas específicas.`
+  },
+  { 
+    id: 3, 
+    title: "Informe Médico 03 - Ruanda",
+    text: `🏥 MINISTERIO DE SALUD DE RUANDA (MINISANTE)
+REGISTRO CLÍNICO DE ATENCIÓN PRIMARIA | REF: RW-RWAM-2024-18
+CENTRO EMISOR: Dispensario General, Distrito de Rwamagana.
+
+📄 DATOS DEL PACIENTE
+EDAD: 18 años.
+SEXO: Masculino.
+PROCEDENCIA: Sector rural, Distrito de Rwamagana.
+
+🔍 HALLAZGOS CLÍNICOS
+El paciente acude al dispensario por una dificultad respiratoria aguda que le impide realizar sus actividades diarias normales:
+
+SINTOMATOLOGÍA: Presenta una {insuficiencia respiratoria} general caracterizada por fuertes sibilancias (silbidos audibles al respirar), tos seca persistente y una sensación de opresión en el pecho. El paciente manifiesta una evidente falta de aliento incluso en estado de reposo.
+
+VALORACIÓN: La auscultación pulmonar confirma una obstrucción de las vías aéreas superiores e inferiores.
+
+💊 PRESCRIPCIÓN MÉDICA
+Los síntomas son 100% compatibles con un cuadro de inflamación bronquial crónica exacerbado por factores externos:
+DIAGNÓSTICO: Asma bronquial de aparición/agravamiento súbito.
+TRATAMIENTO: Administración inmediata de {salbutamol}.
+FORMATO: Se prescribe preferentemente en formato {inhalador} para asegurar una acción rápida sobre los bronquios.`
+  },
+  { 
+    id: 4, 
+    title: "Informe Médico 04 - Chad",
+    text: `🏥 UNIDAD DE ASISTENCIA HUMANITARIA - CAMPO DE IRIDIMI, CHAD
+REGISTRO DE VIGILANCIA NUTRICIONAL | REF: TD-IRID-2024-04
+CENTRO EMISOR: Servicio de Enfermería y Nutrición Pediátrica.
+
+📄 DATOS DEL PACIENTE
+EDAD: 4 años.
+SEXO: Masculino.
+ESTADO: Refugiado residente en el Sector B.
+
+🔍 EVALUACIÓN FÍSICA Y SINTOMATOLOGÍA
+El menor es traído a la enfermería para su control trimestral. Los resultados muestran un deterioro alarmante de su condición física:
+
+ESTADO GENERAL: Se registra una pérdida de peso grave desde el último control. El paciente presenta una fatiga extrema y debilidad muscular que le impide caminar tramos cortos. Reporta mareos frecuentes y un sistema inmunológico visiblemente debilitado.
+
+SIGNOS CLÍNICOS: Piel xerótica (seca), cabello quebradizo y de coloración alterada, uñas frágiles y marcados edemas (hinchazón) en extremidades inferiores. Se observa una {atrofia} muscular severa en brazos y tórax.
+
+💊 DIAGNÓSTICO Y TRATAMIENTO
+El cuadro clínico es concluyente y requiere intervención inmediata:
+DIAGNÓSTICO: Caso severo de {desnutrición} aguda.
+PLAN DE RECUPERACIÓN: Se recomienda iniciar un tratamiento de choque basado en el suministro de {sobre alimenticio} terapéutico (RUTF) de alta densidad calórica y vitamínica.
+SEGUIMIENTO: Control de peso semanal y suplementación con micronutrientes.`
+  }
+];
+
+export default function App() {
+  const [appState, setAppState] = useState('welcome'); // 'welcome', 'validating', 'summary'
+  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  // Estado para las respuestas actuales del usuario
+  const [currentInputs, setCurrentInputs] = useState({});
+  const [showErrors, setShowErrors] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  // Extraer las partes del texto (texto normal y huecos)
+  const currentReport = initialReports[currentIndex];
+  
+  // Utilidad para parsear el texto
+  const getParsedText = (text) => {
+    return text.split(/\{([^}]+)\}/g);
+  };
+
+  const currentParts = appState === 'validating' ? getParsedText(currentReport.text) : [];
+  
+  // Obtener las respuestas correctas en orden
+  const expectedAnswers = currentParts.filter((_, i) => i % 2 !== 0);
+
+  const startValidation = () => {
+    setAppState('validating');
+    resetForm();
+  };
+
+  const resetForm = () => {
+    setCurrentInputs({});
+    setShowErrors(false);
+    setIsSuccess(false);
+  };
+
+  const handleInputChange = (index, value) => {
+    setCurrentInputs(prev => ({
+      ...prev,
+      [index]: value
+    }));
+    setShowErrors(false); // Ocultar errores al escribir
+  };
+
+  const handleVerify = () => {
+    let allCorrect = true;
+    
+    expectedAnswers.forEach((ans, i) => {
+      const userInput = (currentInputs[i] || '').toLowerCase().trim();
+      const correctAnswer = ans.toLowerCase().trim();
+      
+      if (userInput !== correctAnswer) {
+        allCorrect = false;
+      }
+    });
+
+    if (allCorrect) {
+      setIsSuccess(true);
+      setShowErrors(false);
+    } else {
+      setShowErrors(true);
+      setIsSuccess(false);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentIndex < initialReports.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+      resetForm();
+    } else {
+      setAppState('summary');
+    }
+  };
+
+  const restartApp = () => {
+    setCurrentIndex(0);
+    setAppState('welcome');
+    resetForm();
+  };
+
+  // --- COMPONENTES DE VISTA ---
+
+  const renderWelcome = () => (
+    <div className="flex flex-col items-center justify-center min-h-[80vh] text-center px-4">
+      <div className="bg-blue-50 p-6 rounded-full mb-6 shadow-inner">
+        <Activity className="w-16 h-16 text-blue-600" />
+      </div>
+      <h1 className="text-4xl font-bold text-gray-800 mb-4 tracking-tight">Validador Clínico Avanzado</h1>
+      <p className="text-xl text-gray-600 max-w-2xl mb-8 leading-relaxed">
+        Bienvenido a la herramienta de revisión documental. Su tarea es leer atentamente 4 informes médicos de distintas misiones internacionales y completar la terminología clínica ausente utilizando el banco de palabras.
+      </p>
+      <button 
+        onClick={startValidation}
+        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+      >
+        Comenzar Revisión <ArrowRight className="w-5 h-5" />
+      </button>
+    </div>
+  );
+
+  const renderValidating = () => {
+    const progressPercentage = ((currentIndex) / initialReports.length) * 100;
+
+    return (
+      <div className="max-w-6xl mx-auto py-8 px-4">
+        {/* Header / Progress */}
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-2xl font-bold text-gray-800">Expedientes en Revisión</h2>
+            <span className="text-sm font-medium text-blue-700 bg-blue-100 px-3 py-1 rounded-full">
+              Caso {currentIndex + 1} de {initialReports.length}
+            </span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div 
+              className="bg-blue-600 h-2 rounded-full transition-all duration-500 ease-in-out" 
+              style={{ width: `${progressPercentage}%` }}
+            ></div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Panel Izquierdo: El Informe (Cloze) */}
+          <div className="lg:col-span-2 bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden flex flex-col">
+            <div className="bg-slate-50 px-6 py-4 border-b border-gray-200 flex items-center gap-3">
+              <FileText className="text-slate-600 w-5 h-5" />
+              <h3 className="font-bold text-slate-800">{currentReport.title}</h3>
+            </div>
+            <div className="p-6 flex-grow overflow-y-auto bg-white" style={{ maxHeight: '65vh' }}>
+              <div className="text-gray-800 text-[15px] leading-relaxed font-mono whitespace-pre-wrap">
+                {currentParts.map((part, index) => {
+                  // Si el índice es par, es texto normal
+                  if (index % 2 === 0) {
+                    return <span key={`text-${index}`}>{part}</span>;
+                  }
+                  
+                  // Si el índice es impar, es un hueco (input)
+                  const inputIndex = Math.floor(index / 2);
+                  const isCorrect = isSuccess; 
+                  const hasError = showErrors && (currentInputs[inputIndex] || '').toLowerCase().trim() !== part.toLowerCase().trim();
+                  
+                  // Calcular ancho dinámico basado en la respuesta esperada
+                  const widthClass = part.length > 20 ? 'w-64' : (part.length > 10 ? 'w-40' : 'w-28');
+
+                  return (
+                    <span key={`input-${index}`} className="inline-block align-middle mx-1 my-1">
+                      <input
+                        type="text"
+                        disabled={isSuccess}
+                        value={currentInputs[inputIndex] || ''}
+                        onChange={(e) => handleInputChange(inputIndex, e.target.value)}
+                        className={`
+                          ${widthClass} max-w-[90vw] text-center px-2 py-1 text-sm font-bold rounded outline-none transition-all
+                          ${isCorrect 
+                            ? 'bg-green-100 text-green-800 border-b-2 border-green-500' 
+                            : hasError
+                              ? 'bg-red-50 text-red-700 border-b-2 border-red-500 focus:bg-red-100'
+                              : 'bg-blue-50 text-blue-800 border-b-2 border-blue-400 focus:bg-blue-100 focus:border-blue-600'
+                          }
+                        `}
+                        placeholder="?"
+                      />
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Panel Derecho: Controles y Banco de Palabras */}
+          <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6 flex flex-col h-fit sticky top-24">
+            <h3 className="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Instrucciones</h3>
+            <p className="text-sm text-gray-600 mb-6">
+              Complete los espacios en blanco del documento apelando a sus conocimientos clínicos. Asegúrese de escribir correctamente cada término.
+            </p>
+
+            {/* Mensajes de validación */}
+            {showErrors && !isSuccess && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg flex items-start gap-2">
+                <AlertCircle className="w-5 h-5 shrink-0" />
+                <p>Algunas palabras no son correctas o están mal escritas. Revise la ortografía e inténtelo de nuevo.</p>
+              </div>
+            )}
+
+            {isSuccess && (
+              <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 text-sm rounded-lg flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 shrink-0" />
+                <p className="font-semibold">¡Validación correcta! El informe está completo.</p>
+              </div>
+            )}
+
+            {/* Acciones */}
+            <div className="mt-auto pt-4 border-t border-gray-100">
+              {!isSuccess ? (
+                <button
+                  onClick={handleVerify}
+                  className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold transition-all shadow-sm"
+                >
+                  Verificar Informe
+                </button>
+              ) : (
+                <button
+                  onClick={handleNext}
+                  className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold transition-all shadow-sm animate-pulse"
+                >
+                  {currentIndex === initialReports.length - 1 ? 'Finalizar Auditoría' : 'Siguiente Informe'} 
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderSummary = () => {
+    return (
+      <div className="max-w-3xl mx-auto py-16 px-4">
+        <div className="bg-white p-10 rounded-2xl shadow-xl text-center border border-gray-100">
+          <div className="inline-flex items-center justify-center w-24 h-24 bg-green-100 text-green-600 rounded-full mb-6">
+            <CheckCircle className="w-12 h-12" />
+          </div>
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">¡Trabajo Excelente!</h1>
+          <p className="text-xl text-gray-600 mb-8">
+            Has procesado y validado con éxito los {initialReports.length} informes clínicos. Tu precisión terminológica ayudará a mantener la calidad de los historiales médicos de estas misiones humanitarias.
+          </p>
+          
+          <div className="grid grid-cols-2 gap-4 mb-10 text-left">
+            {initialReports.map((report, idx) => (
+              <div key={report.id} className="bg-slate-50 p-4 rounded-lg border border-slate-200 flex items-center gap-3">
+                <Check className="w-5 h-5 text-green-500" />
+                <span className="font-medium text-slate-700 text-sm">{report.title}</span>
+              </div>
+            ))}
+          </div>
+
+          <button 
+            onClick={restartApp}
+            className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-bold px-6 py-3 rounded-lg hover:bg-blue-50 transition-colors"
+          >
+            <RefreshCcw className="w-5 h-5" /> Iniciar nueva sesión
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-100 font-sans text-gray-900 selection:bg-blue-200 selection:text-blue-900">
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
+        <div className="flex items-center gap-3 text-blue-800 font-bold text-xl tracking-tight">
+          <Activity className="w-6 h-6" />
+          MediValida
+        </div>
+        {appState !== 'welcome' && (
+          <div className="text-sm text-slate-500 font-medium flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+            Sesión Activa
+          </div>
+        )}
+      </header>
+
+      {/* Main Content */}
+      <main className="pb-12">
+        {appState === 'welcome' && renderWelcome()}
+        {appState === 'validating' && renderValidating()}
+        {appState === 'summary' && renderSummary()}
+      </main>
+    </div>
+  );
+}
