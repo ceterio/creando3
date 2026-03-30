@@ -1,21 +1,51 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  CheckCircle, 
-  XCircle, 
-  FileText, 
-  ArrowRight, 
-  Activity,
-  Check,
-  RefreshCcw,
-  AlertCircle
-} from 'lucide-react';
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediValida - Validador Clínico</title>
+  
+  <!-- Carga de Tailwind CSS para los estilos -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Carga de React y ReactDOM -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <!-- Carga de Babel para poder leer JSX directamente en el navegador -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-// Informes basados en los documentos proporcionados, con formato Cloze {respuesta_correcta}
-const initialReports = [
-  { 
-    id: 1, 
-    title: "Informe Médico 01 - Honduras",
-    text: `🏥 SISTEMA DE SALUD PÚBLICA - REPÚBLICA DE HONDURAS
+  <style>
+    /* Estilos base adicionales si se requieren */
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-100 font-sans text-gray-900 selection:bg-blue-200 selection:text-blue-900 min-h-screen">
+  
+  <!-- Contenedor principal donde React inyectará la aplicación -->
+  <div id="root"></div>
+
+  <!-- Script principal de la aplicación en React -->
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // --- ÍCONOS SVG (Reemplazo de lucide-react para versión sin empaquetador) ---
+    const IconProps = { xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" };
+    
+    const Activity = ({ className }) => <svg {...IconProps} className={className}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>;
+    const ArrowRight = ({ className }) => <svg {...IconProps} className={className}><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>;
+    const CheckCircle = ({ className }) => <svg {...IconProps} className={className}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>;
+    const AlertCircle = ({ className }) => <svg {...IconProps} className={className}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>;
+    const FileText = ({ className }) => <svg {...IconProps} className={className}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>;
+    const Check = ({ className }) => <svg {...IconProps} className={className}><polyline points="20 6 9 17 4 12"></polyline></svg>;
+    const RefreshCcw = ({ className }) => <svg {...IconProps} className={className}><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg>;
+
+    // --- DATOS DE LOS INFORMES ---
+    const initialReports = [
+      { 
+        id: 1, 
+        title: "Informe Médico 01 - Honduras",
+        text: `🏥 SISTEMA DE SALUD PÚBLICA - REPÚBLICA DE HONDURAS
 EXPEDIENTE CLÍNICO DIGITAL | Nº Registro: HN-2024-089-CLIM
 CENTRO EMISOR: Hospital de El Negrito, Departamento de Yoro.
 
@@ -41,11 +71,11 @@ FORMATO: Comprimidos (pastillas).
 
 ⚠️ ANÁLISIS DE CONTEXTO
 Este caso no es aislado. El Hospital ha reportado un aumento del 40% en enfermedades transmitidas por mosquitos tras las inundaciones inusuales.`
-  },
-  { 
-    id: 2, 
-    title: "Informe Médico 02 - Nigeria",
-    text: `🏥 SERVICIO DE SALUD DEL ESTADO DE BORNO - NIGERIA
+      },
+      { 
+        id: 2, 
+        title: "Informe Médico 02 - Nigeria",
+        text: `🏥 SERVICIO DE SALUD DEL ESTADO DE BORNO - NIGERIA
 EXPEDIENTE DE VIGILANCIA EPIDEMIOLÓGICA | REF: NG-BORN-2024-55
 UNIDAD EMISORA: Centro de Salud de Maiduguri.
 
@@ -67,11 +97,11 @@ Se establece un protocolo de emergencia para estabilizar a la paciente y evitar 
 
 REHIDRATACIÓN: Suministro inmediato de {sales minerales} para compensar la pérdida crítica de líquidos y electrolitos.
 PROTOCOLO DE PREVENCIÓN: Dada la intensidad de la sintomatología y el riesgo epidémico en la zona, se inicia un tratamiento preventivo contra el {cólera} mediante la administración de cápsulas específicas.`
-  },
-  { 
-    id: 3, 
-    title: "Informe Médico 03 - Ruanda",
-    text: `🏥 MINISTERIO DE SALUD DE RUANDA (MINISANTE)
+      },
+      { 
+        id: 3, 
+        title: "Informe Médico 03 - Ruanda",
+        text: `🏥 MINISTERIO DE SALUD DE RUANDA (MINISANTE)
 REGISTRO CLÍNICO DE ATENCIÓN PRIMARIA | REF: RW-RWAM-2024-18
 CENTRO EMISOR: Dispensario General, Distrito de Rwamagana.
 
@@ -92,11 +122,11 @@ Los síntomas son 100% compatibles con un cuadro de inflamación bronquial crón
 DIAGNÓSTICO: Asma bronquial de aparición/agravamiento súbito.
 TRATAMIENTO: Administración inmediata de {salbutamol}.
 FORMATO: Se prescribe preferentemente en formato {inhalador} para asegurar una acción rápida sobre los bronquios.`
-  },
-  { 
-    id: 4, 
-    title: "Informe Médico 04 - Chad",
-    text: `🏥 UNIDAD DE ASISTENCIA HUMANITARIA - CAMPO DE IRIDIMI, CHAD
+      },
+      { 
+        id: 4, 
+        title: "Informe Médico 04 - Chad",
+        text: `🏥 UNIDAD DE ASISTENCIA HUMANITARIA - CAMPO DE IRIDIMI, CHAD
 REGISTRO DE VIGILANCIA NUTRICIONAL | REF: TD-IRID-2024-04
 CENTRO EMISOR: Servicio de Enfermería y Nutrición Pediátrica.
 
@@ -117,276 +147,270 @@ El cuadro clínico es concluyente y requiere intervención inmediata:
 DIAGNÓSTICO: Caso severo de {desnutrición} aguda.
 PLAN DE RECUPERACIÓN: Se recomienda iniciar un tratamiento de choque basado en el suministro de {sobre alimenticio} terapéutico (RUTF) de alta densidad calórica y vitamínica.
 SEGUIMIENTO: Control de peso semanal y suplementación con micronutrientes.`
-  }
-];
-
-export default function App() {
-  const [appState, setAppState] = useState('welcome'); // 'welcome', 'validating', 'summary'
-  const [currentIndex, setCurrentIndex] = useState(0);
-  
-  // Estado para las respuestas actuales del usuario
-  const [currentInputs, setCurrentInputs] = useState({});
-  const [showErrors, setShowErrors] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-
-  // Extraer las partes del texto (texto normal y huecos)
-  const currentReport = initialReports[currentIndex];
-  
-  // Utilidad para parsear el texto
-  const getParsedText = (text) => {
-    return text.split(/\{([^}]+)\}/g);
-  };
-
-  const currentParts = appState === 'validating' ? getParsedText(currentReport.text) : [];
-  
-  // Obtener las respuestas correctas en orden
-  const expectedAnswers = currentParts.filter((_, i) => i % 2 !== 0);
-
-  const startValidation = () => {
-    setAppState('validating');
-    resetForm();
-  };
-
-  const resetForm = () => {
-    setCurrentInputs({});
-    setShowErrors(false);
-    setIsSuccess(false);
-  };
-
-  const handleInputChange = (index, value) => {
-    setCurrentInputs(prev => ({
-      ...prev,
-      [index]: value
-    }));
-    setShowErrors(false); // Ocultar errores al escribir
-  };
-
-  const handleVerify = () => {
-    let allCorrect = true;
-    
-    expectedAnswers.forEach((ans, i) => {
-      const userInput = (currentInputs[i] || '').toLowerCase().trim();
-      const correctAnswer = ans.toLowerCase().trim();
-      
-      if (userInput !== correctAnswer) {
-        allCorrect = false;
       }
-    });
+    ];
 
-    if (allCorrect) {
-      setIsSuccess(true);
-      setShowErrors(false);
-    } else {
-      setShowErrors(true);
-      setIsSuccess(false);
-    }
-  };
+    // --- COMPONENTE PRINCIPAL ---
+    function App() {
+      const [appState, setAppState] = useState('welcome'); // 'welcome', 'validating', 'summary'
+      const [currentIndex, setCurrentIndex] = useState(0);
+      
+      const [currentInputs, setCurrentInputs] = useState({});
+      const [showErrors, setShowErrors] = useState(false);
+      const [isSuccess, setIsSuccess] = useState(false);
 
-  const handleNext = () => {
-    if (currentIndex < initialReports.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-      resetForm();
-    } else {
-      setAppState('summary');
-    }
-  };
+      const currentReport = initialReports[currentIndex];
+      
+      const getParsedText = (text) => {
+        return text.split(/\{([^}]+)\}/g);
+      };
 
-  const restartApp = () => {
-    setCurrentIndex(0);
-    setAppState('welcome');
-    resetForm();
-  };
+      const currentParts = appState === 'validating' ? getParsedText(currentReport.text) : [];
+      const expectedAnswers = currentParts.filter((_, i) => i % 2 !== 0);
 
-  // --- COMPONENTES DE VISTA ---
+      const startValidation = () => {
+        setAppState('validating');
+        resetForm();
+      };
 
-  const renderWelcome = () => (
-    <div className="flex flex-col items-center justify-center min-h-[80vh] text-center px-4">
-      <div className="bg-blue-50 p-6 rounded-full mb-6 shadow-inner">
-        <Activity className="w-16 h-16 text-blue-600" />
-      </div>
-      <h1 className="text-4xl font-bold text-gray-800 mb-4 tracking-tight">Validador Clínico Avanzado</h1>
-      <p className="text-xl text-gray-600 max-w-2xl mb-8 leading-relaxed">
-        Bienvenido a la herramienta de revisión documental. Su tarea es leer atentamente 4 informes médicos de distintas misiones internacionales y completar la terminología clínica ausente utilizando el banco de palabras.
-      </p>
-      <button 
-        onClick={startValidation}
-        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-      >
-        Comenzar Revisión <ArrowRight className="w-5 h-5" />
-      </button>
-    </div>
-  );
+      const resetForm = () => {
+        setCurrentInputs({});
+        setShowErrors(false);
+        setIsSuccess(false);
+      };
 
-  const renderValidating = () => {
-    const progressPercentage = ((currentIndex) / initialReports.length) * 100;
+      const handleInputChange = (index, value) => {
+        setCurrentInputs(prev => ({
+          ...prev,
+          [index]: value
+        }));
+        setShowErrors(false);
+      };
 
-    return (
-      <div className="max-w-6xl mx-auto py-8 px-4">
-        {/* Header / Progress */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-2xl font-bold text-gray-800">Expedientes en Revisión</h2>
-            <span className="text-sm font-medium text-blue-700 bg-blue-100 px-3 py-1 rounded-full">
-              Caso {currentIndex + 1} de {initialReports.length}
-            </span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
-              className="bg-blue-600 h-2 rounded-full transition-all duration-500 ease-in-out" 
-              style={{ width: `${progressPercentage}%` }}
-            ></div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Panel Izquierdo: El Informe (Cloze) */}
-          <div className="lg:col-span-2 bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden flex flex-col">
-            <div className="bg-slate-50 px-6 py-4 border-b border-gray-200 flex items-center gap-3">
-              <FileText className="text-slate-600 w-5 h-5" />
-              <h3 className="font-bold text-slate-800">{currentReport.title}</h3>
-            </div>
-            <div className="p-6 flex-grow overflow-y-auto bg-white" style={{ maxHeight: '65vh' }}>
-              <div className="text-gray-800 text-[15px] leading-relaxed font-mono whitespace-pre-wrap">
-                {currentParts.map((part, index) => {
-                  // Si el índice es par, es texto normal
-                  if (index % 2 === 0) {
-                    return <span key={`text-${index}`}>{part}</span>;
-                  }
-                  
-                  // Si el índice es impar, es un hueco (input)
-                  const inputIndex = Math.floor(index / 2);
-                  const isCorrect = isSuccess; 
-                  const hasError = showErrors && (currentInputs[inputIndex] || '').toLowerCase().trim() !== part.toLowerCase().trim();
-                  
-                  // Calcular ancho dinámico basado en la respuesta esperada
-                  const widthClass = part.length > 20 ? 'w-64' : (part.length > 10 ? 'w-40' : 'w-28');
-
-                  return (
-                    <span key={`input-${index}`} className="inline-block align-middle mx-1 my-1">
-                      <input
-                        type="text"
-                        disabled={isSuccess}
-                        value={currentInputs[inputIndex] || ''}
-                        onChange={(e) => handleInputChange(inputIndex, e.target.value)}
-                        className={`
-                          ${widthClass} max-w-[90vw] text-center px-2 py-1 text-sm font-bold rounded outline-none transition-all
-                          ${isCorrect 
-                            ? 'bg-green-100 text-green-800 border-b-2 border-green-500' 
-                            : hasError
-                              ? 'bg-red-50 text-red-700 border-b-2 border-red-500 focus:bg-red-100'
-                              : 'bg-blue-50 text-blue-800 border-b-2 border-blue-400 focus:bg-blue-100 focus:border-blue-600'
-                          }
-                        `}
-                        placeholder="?"
-                      />
-                    </span>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* Panel Derecho: Controles y Banco de Palabras */}
-          <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6 flex flex-col h-fit sticky top-24">
-            <h3 className="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Instrucciones</h3>
-            <p className="text-sm text-gray-600 mb-6">
-              Complete los espacios en blanco del documento apelando a sus conocimientos clínicos. Asegúrese de escribir correctamente cada término.
-            </p>
-
-            {/* Mensajes de validación */}
-            {showErrors && !isSuccess && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg flex items-start gap-2">
-                <AlertCircle className="w-5 h-5 shrink-0" />
-                <p>Algunas palabras no son correctas o están mal escritas. Revise la ortografía e inténtelo de nuevo.</p>
-              </div>
-            )}
-
-            {isSuccess && (
-              <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 text-sm rounded-lg flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 shrink-0" />
-                <p className="font-semibold">¡Validación correcta! El informe está completo.</p>
-              </div>
-            )}
-
-            {/* Acciones */}
-            <div className="mt-auto pt-4 border-t border-gray-100">
-              {!isSuccess ? (
-                <button
-                  onClick={handleVerify}
-                  className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold transition-all shadow-sm"
-                >
-                  Verificar Informe
-                </button>
-              ) : (
-                <button
-                  onClick={handleNext}
-                  className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold transition-all shadow-sm animate-pulse"
-                >
-                  {currentIndex === initialReports.length - 1 ? 'Finalizar Auditoría' : 'Siguiente Informe'} 
-                  <ArrowRight className="w-5 h-5" />
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const renderSummary = () => {
-    return (
-      <div className="max-w-3xl mx-auto py-16 px-4">
-        <div className="bg-white p-10 rounded-2xl shadow-xl text-center border border-gray-100">
-          <div className="inline-flex items-center justify-center w-24 h-24 bg-green-100 text-green-600 rounded-full mb-6">
-            <CheckCircle className="w-12 h-12" />
-          </div>
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">¡Trabajo Excelente!</h1>
-          <p className="text-xl text-gray-600 mb-8">
-            Has procesado y validado con éxito los {initialReports.length} informes clínicos. Tu precisión terminológica ayudará a mantener la calidad de los historiales médicos de estas misiones humanitarias.
-          </p>
+      const handleVerify = () => {
+        let allCorrect = true;
+        
+        expectedAnswers.forEach((ans, i) => {
+          const userInput = (currentInputs[i] || '').toLowerCase().trim();
+          const correctAnswer = ans.toLowerCase().trim();
           
-          <div className="grid grid-cols-2 gap-4 mb-10 text-left">
-            {initialReports.map((report, idx) => (
-              <div key={report.id} className="bg-slate-50 p-4 rounded-lg border border-slate-200 flex items-center gap-3">
-                <Check className="w-5 h-5 text-green-500" />
-                <span className="font-medium text-slate-700 text-sm">{report.title}</span>
-              </div>
-            ))}
-          </div>
+          if (userInput !== correctAnswer) {
+            allCorrect = false;
+          }
+        });
 
+        if (allCorrect) {
+          setIsSuccess(true);
+          setShowErrors(false);
+        } else {
+          setShowErrors(true);
+          setIsSuccess(false);
+        }
+      };
+
+      const handleNext = () => {
+        if (currentIndex < initialReports.length - 1) {
+          setCurrentIndex(currentIndex + 1);
+          resetForm();
+        } else {
+          setAppState('summary');
+        }
+      };
+
+      const restartApp = () => {
+        setCurrentIndex(0);
+        setAppState('welcome');
+        resetForm();
+      };
+
+      // --- VISTAS ---
+      const renderWelcome = () => (
+        <div className="flex flex-col items-center justify-center min-h-[80vh] text-center px-4">
+          <div className="bg-blue-50 p-6 rounded-full mb-6 shadow-inner">
+            <Activity className="w-16 h-16 text-blue-600" />
+          </div>
+          <h1 className="text-4xl font-bold text-gray-800 mb-4 tracking-tight">Validador Clínico Avanzado</h1>
+          <p className="text-xl text-gray-600 max-w-2xl mb-8 leading-relaxed">
+            Bienvenido a la herramienta de revisión documental. Su tarea es leer atentamente 4 informes médicos de distintas misiones internacionales y completar la terminología clínica ausente utilizando el banco de palabras.
+          </p>
           <button 
-            onClick={restartApp}
-            className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-bold px-6 py-3 rounded-lg hover:bg-blue-50 transition-colors"
+            onClick={startValidation}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
           >
-            <RefreshCcw className="w-5 h-5" /> Iniciar nueva sesión
+            Comenzar Revisión <ArrowRight className="w-5 h-5" />
           </button>
         </div>
-      </div>
-    );
-  };
+      );
 
-  return (
-    <div className="min-h-screen bg-slate-100 font-sans text-gray-900 selection:bg-blue-200 selection:text-blue-900">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
-        <div className="flex items-center gap-3 text-blue-800 font-bold text-xl tracking-tight">
-          <Activity className="w-6 h-6" />
-          MediValida
-        </div>
-        {appState !== 'welcome' && (
-          <div className="text-sm text-slate-500 font-medium flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-            Sesión Activa
+      const renderValidating = () => {
+        const progressPercentage = ((currentIndex) / initialReports.length) * 100;
+
+        return (
+          <div className="max-w-6xl mx-auto py-8 px-4">
+            {/* Header / Progress */}
+            <div className="mb-8">
+              <div className="flex justify-between items-center mb-2">
+                <h2 className="text-2xl font-bold text-gray-800">Expedientes en Revisión</h2>
+                <span className="text-sm font-medium text-blue-700 bg-blue-100 px-3 py-1 rounded-full">
+                  Caso {currentIndex + 1} de {initialReports.length}
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className="bg-blue-600 h-2 rounded-full transition-all duration-500 ease-in-out" 
+                  style={{ width: `${progressPercentage}%` }}
+                ></div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Panel Izquierdo: El Informe */}
+              <div className="lg:col-span-2 bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden flex flex-col">
+                <div className="bg-slate-50 px-6 py-4 border-b border-gray-200 flex items-center gap-3">
+                  <FileText className="text-slate-600 w-5 h-5" />
+                  <h3 className="font-bold text-slate-800">{currentReport.title}</h3>
+                </div>
+                <div className="p-6 flex-grow overflow-y-auto bg-white" style={{ maxHeight: '65vh' }}>
+                  <div className="text-gray-800 text-[15px] leading-relaxed font-mono whitespace-pre-wrap">
+                    {currentParts.map((part, index) => {
+                      if (index % 2 === 0) {
+                        return <span key={`text-${index}`}>{part}</span>;
+                      }
+                      
+                      const inputIndex = Math.floor(index / 2);
+                      const isCorrect = isSuccess; 
+                      const hasError = showErrors && (currentInputs[inputIndex] || '').toLowerCase().trim() !== part.toLowerCase().trim();
+                      const widthClass = part.length > 20 ? 'w-64' : (part.length > 10 ? 'w-40' : 'w-28');
+
+                      return (
+                        <span key={`input-${index}`} className="inline-block align-middle mx-1 my-1">
+                          <input
+                            type="text"
+                            disabled={isSuccess}
+                            value={currentInputs[inputIndex] || ''}
+                            onChange={(e) => handleInputChange(inputIndex, e.target.value)}
+                            className={`
+                              ${widthClass} max-w-[90vw] text-center px-2 py-1 text-sm font-bold rounded outline-none transition-all
+                              ${isCorrect 
+                                ? 'bg-green-100 text-green-800 border-b-2 border-green-500' 
+                                : hasError
+                                  ? 'bg-red-50 text-red-700 border-b-2 border-red-500 focus:bg-red-100'
+                                  : 'bg-blue-50 text-blue-800 border-b-2 border-blue-400 focus:bg-blue-100 focus:border-blue-600'
+                              }
+                            `}
+                            placeholder="?"
+                          />
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Panel Derecho: Controles */}
+              <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6 flex flex-col h-fit sticky top-24">
+                <h3 className="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Instrucciones</h3>
+                <p className="text-sm text-gray-600 mb-6">
+                  Complete los espacios en blanco del documento apelando a sus conocimientos clínicos. Asegúrese de escribir correctamente cada término.
+                </p>
+
+                {showErrors && !isSuccess && (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg flex items-start gap-2">
+                    <AlertCircle className="w-5 h-5 shrink-0" />
+                    <p>Algunas palabras no son correctas o están mal escritas. Revise la ortografía e inténtelo de nuevo.</p>
+                  </div>
+                )}
+
+                {isSuccess && (
+                  <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 text-sm rounded-lg flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5 shrink-0" />
+                    <p className="font-semibold">¡Validación correcta! El informe está completo.</p>
+                  </div>
+                )}
+
+                <div className="mt-auto pt-4 border-t border-gray-100">
+                  {!isSuccess ? (
+                    <button
+                      onClick={handleVerify}
+                      className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold transition-all shadow-sm"
+                    >
+                      Verificar Informe
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleNext}
+                      className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-bold transition-all shadow-sm animate-pulse"
+                    >
+                      {currentIndex === initialReports.length - 1 ? 'Finalizar Auditoría' : 'Siguiente Informe'} 
+                      <ArrowRight className="w-5 h-5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
-        )}
-      </header>
+        );
+      };
 
-      {/* Main Content */}
-      <main className="pb-12">
-        {appState === 'welcome' && renderWelcome()}
-        {appState === 'validating' && renderValidating()}
-        {appState === 'summary' && renderSummary()}
-      </main>
-    </div>
-  );
-}
+      const renderSummary = () => {
+        return (
+          <div className="max-w-3xl mx-auto py-16 px-4">
+            <div className="bg-white p-10 rounded-2xl shadow-xl text-center border border-gray-100">
+              <div className="inline-flex items-center justify-center w-24 h-24 bg-green-100 text-green-600 rounded-full mb-6">
+                <CheckCircle className="w-12 h-12" />
+              </div>
+              <h1 className="text-4xl font-bold text-gray-800 mb-4">¡Trabajo Excelente!</h1>
+              <p className="text-xl text-gray-600 mb-8">
+                Has procesado y validado con éxito los {initialReports.length} informes clínicos. Tu precisión terminológica ayudará a mantener la calidad de los historiales médicos de estas misiones humanitarias.
+              </p>
+              
+              <div className="grid grid-cols-2 gap-4 mb-10 text-left">
+                {initialReports.map((report) => (
+                  <div key={report.id} className="bg-slate-50 p-4 rounded-lg border border-slate-200 flex items-center gap-3">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span className="font-medium text-slate-700 text-sm">{report.title}</span>
+                  </div>
+                ))}
+              </div>
+
+              <button 
+                onClick={restartApp}
+                className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-bold px-6 py-3 rounded-lg hover:bg-blue-50 transition-colors"
+              >
+                <RefreshCcw className="w-5 h-5" /> Iniciar nueva sesión
+              </button>
+            </div>
+          </div>
+        );
+      };
+
+      return (
+        <div>
+          <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
+            <div className="flex items-center gap-3 text-blue-800 font-bold text-xl tracking-tight">
+              <Activity className="w-6 h-6" />
+              MediValida
+            </div>
+            {appState !== 'welcome' && (
+              <div className="text-sm text-slate-500 font-medium flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                Sesión Activa
+              </div>
+            )}
+          </header>
+
+          <main className="pb-12">
+            {appState === 'welcome' && renderWelcome()}
+            {appState === 'validating' && renderValidating()}
+            {appState === 'summary' && renderSummary()}
+          </main>
+        </div>
+      );
+    }
+
+    // Inicializar React
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
